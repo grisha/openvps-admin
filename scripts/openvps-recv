@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.2 2004/12/24 03:43:32 grisha Exp $
+# $Id: openvps-recv,v 1.3 2004/12/24 03:55:29 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -236,7 +236,7 @@ def do_work():
    global EXIT
 
    udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-   udp_sock.bind(('0.0.0.0', cfg.MON_PORT))
+   udp_sock.bind(('0.0.0.0', cfg.MON_TARGET_PORT))
 
    while 1:
       data, addr = udp_sock.recvfrom(1024)
