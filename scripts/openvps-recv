@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.7 2004/12/24 05:39:14 grisha Exp $
+# $Id: openvps-recv,v 1.8 2004/12/25 04:45:53 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -229,8 +229,11 @@ def decode(data):
 
    result = {}
    for n in xrange(len(KEYS)):
-      result[KEYS[n]] = list[n]
-      
+      if list[n]:
+         result[KEYS[n]] = list[n]
+      else:
+         result[KEYS[n]] = 'U'
+         
    return result
 
 
