@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.4 2004/12/24 04:02:22 grisha Exp $
+# $Id: openvps-recv,v 1.5 2004/12/24 04:04:39 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -214,6 +214,8 @@ def work():
    log('Exiting...')
    sys.exit(1)
 
+KEYS = [x[0] for x in cfg.MON_DATA_DEF
+
 def decode(data):
 
    sig, data = data[:16], data[16:]
@@ -226,8 +228,8 @@ def decode(data):
    list = marshal.loads(data)
 
    result = {}
-   for n in xrange(len(keys)):
-      result[keys[n]] = list[n]
+   for n in xrange(len(KEYS)):
+      result[KEYS[n]] = list[n]
       
    return result
                                                            
