@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# $Id: configure.in,v 1.1 2004/12/24 03:26:17 grisha Exp $
+# $Id: configure.in,v 1.2 2005/03/01 04:12:29 grisha Exp $
 
 AC_INIT
 
@@ -100,4 +100,6 @@ fi
 # final output
 
 AC_OUTPUT( Makefile mkspec rhinit/Makefile scripts/Makefile \
-	   openvps-admin.conf rhinit/openvps-recv)
+	   openvps-admin.conf rhinit/openvps-recv www/conf/openvps-admin.conf \
+	   www/Makefile www/conf/Makefile www/images/Makefile  \
+	   www/templates/Makefile )

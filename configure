@@ -2558,7 +2558,7 @@ fi
 
 # final output
 
-                                                            ac_config_files="$ac_config_files Makefile mkspec rhinit/Makefile scripts/Makefile openvps-admin.conf rhinit/openvps-recv"
+                                                                                                              ac_config_files="$ac_config_files Makefile mkspec rhinit/Makefile scripts/Makefile openvps-admin.conf rhinit/openvps-recv www/conf/openvps-admin.conf www/Makefile www/conf/Makefile www/images/Makefile www/templates/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -3116,6 +3116,11 @@ do
   "scripts/Makefile" ) CONFIG_FILES="$CONFIG_FILES scripts/Makefile" ;;
   "openvps-admin.conf" ) CONFIG_FILES="$CONFIG_FILES openvps-admin.conf" ;;
   "rhinit/openvps-recv" ) CONFIG_FILES="$CONFIG_FILES rhinit/openvps-recv" ;;
+  "www/conf/openvps-admin.conf" ) CONFIG_FILES="$CONFIG_FILES www/conf/openvps-admin.conf" ;;
+  "www/Makefile" ) CONFIG_FILES="$CONFIG_FILES www/Makefile" ;;
+  "www/conf/Makefile" ) CONFIG_FILES="$CONFIG_FILES www/conf/Makefile" ;;
+  "www/images/Makefile" ) CONFIG_FILES="$CONFIG_FILES www/images/Makefile" ;;
+  "www/templates/Makefile" ) CONFIG_FILES="$CONFIG_FILES www/templates/Makefile" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;
