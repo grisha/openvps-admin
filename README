@@ -1,0 +1,3 @@
+
+This is code that gets installed only on the admin server(s) and not on
+host servers.
