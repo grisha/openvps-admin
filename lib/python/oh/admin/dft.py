@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# $Id: dft.py,v 1.2 2004/12/24 03:46:51 grisha Exp $
+# $Id: dft.py,v 1.3 2004/12/24 03:57:45 grisha Exp $
 
 import os
 
@@ -31,7 +31,7 @@ for CONFIG_FILE for the exact value).
 CONFIG_DIR = '/etc'
 
 # Configuration file
-CONFIG_FILE = os.path.join(CONFIG_DIR, 'openvps.conf')
+CONFIG_FILE = os.path.join(CONFIG_DIR, 'openvps-admin.conf')
 
 # pid
 MON_PID_FILE = '/var/run/openvps-recv'
