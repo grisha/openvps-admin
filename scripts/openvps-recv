@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.1 2004/12/24 03:26:17 grisha Exp $
+# $Id: openvps-recv,v 1.2 2004/12/24 03:43:32 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -32,6 +32,8 @@ import socket
 import traceback
 from signal import SIGTERM, SIGKILL
 from syslog import syslog, openlog
+
+import hmac
 
 # openvps modules
 from oh.admin import cfg
@@ -211,27 +213,44 @@ def work():
    log('Exiting...')
    sys.exit(1)
 
+def decode(data):
+
+   sig, data = data[:16], data[16:]
+   our_sig = hmac.new(cfg.MON_SECRET, data).digest()
+
+   if sig != our_sig:
+      # abort!
+      return None
+
+   list = marshal.loads(data)
+
+   result = {}
+   for n in xrange(len(keys)):
+      result[keys[n]] = list[n]
+      
+   return result
+                                                           
+
 def do_work():
 
    global EXIT
 
-
    udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-   udp_sock.bind(('0.0.0.0', 2004))
+   udp_sock.bind(('0.0.0.0', cfg.MON_PORT))
 
    while 1:
       data, addr = udp_sock.recvfrom(1024)
 
+      decoded = decode(data)
 
-      # GT STOPPED HERE  - we also need a central config file...
-
-      print `data`
-      print decode(data)
+      if not decoded:
+         log('Invalid data received from %s : %s' % (addr[0], `data`))
+      else:
+         # ZZZ
+         log('Received from %s : %s' % (addr[0], `decoded`))
 
       if EXIT:
          return
-
-                  
 
 if __name__ == "__main__":
 
