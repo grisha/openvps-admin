@@ -15,6 +15,27 @@
 # limitations under the License.
 #
 
-# $Id: __init__.py,v 1.1 2004/12/24 03:26:17 grisha Exp $
+# $Id: cfg.py,v 1.1 2005/01/12 21:25:19 grisha Exp $
 
+def load_file(path):
+    """Load a config file"""
+
+    locals = {}
+
+    try:
+        execfile(path, {}, locals)
+    except IOError, err:
+        if 'No such file' in str(err):
+            # no file is OK
+            pass
+        else:
+            raise sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]
+
+    return locals
+
+
+from oh.common.cfg import *
+from dft import *
+
+locals().update(load_file(CONFIG_FILE))
 

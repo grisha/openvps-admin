@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# $Id: setup.py,v 1.1 2004/12/24 03:26:17 grisha Exp $
+# $Id: setup.py,v 1.2 2005/01/12 21:25:19 grisha Exp $
 
 from distutils.core import setup, Extension
 
@@ -24,11 +24,11 @@ import sys
 
 setup(name='openvps-admin',
       version=VER,
-      description='OpenHosting Admin Utilities',
+      description='OpenVPS Admin Utilities',
       author='OpenHosting, Inc.',
       author_email='dev@openvps.org',
       url='http://www.openvps.org/',
-      packages=['oh.admin'])
+      packages=['openvps.admin'])
 
 
                           

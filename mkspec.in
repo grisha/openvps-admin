@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: mkspec.in,v 1.2 2004/12/24 05:39:14 grisha Exp $
+# $Id: mkspec.in,v 1.3 2005/01/12 21:25:19 grisha Exp $
 
 # Output a spec file for an RPM
 
@@ -53,7 +53,7 @@ echo "make"
 echo "%install"
 echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/etc/init.d"
 echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/var/db/openvps"
-echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/%{_libdir}/@PYTHON@/site-packages/oh"
+echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/%{_libdir}/@PYTHON@/site-packages/openvps"
 echo 'make install DESTDIR=$RPM_BUILD_ROOT'
 
 echo "%clean"
