@@ -1,0 +1,69 @@
+#!/bin/sh
+
+#
+# Copyright 2004 OpenHosting, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# $Id: mkspec.in,v 1.1 2004/12/24 03:26:17 grisha Exp $
+
+# Output a spec file for an RPM
+
+# ------- package info -------
+
+echo "Summary: OpenVPS Admin Utilities"
+echo "Name: openvps-admin"
+echo "Version: `cat version.txt`"
+echo "Release: 1"
+echo "License: ASL 2.0"
+echo "Group: OpenVPS"
+echo "URL: http://www.openvps.org/"
+echo "Vendor: OpenHosting, Inc."
+echo "Requires: openvps-common >= 0.6"
+echo "Requires: python httpd mod_python mod_ssl bind rrdtool"
+echo "Source0: %{name}-%{version}.tgz"
+echo "BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot"
+echo "BuildPrereq: python-devel httpd-devel"
+
+echo "%description"
+echo "OpenVPS Admin Utilities"
+
+# ------- build -------
+
+echo "%prep"
+echo "%setup -q"
+
+echo "%build"
+echo "%configure"
+echo "make"
+
+# ------- install -------
+
+echo "%install"
+echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/etc/init.d"
+echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/var/db/oh"
+echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/%{_libdir}/@PYTHON@/site-packages/oh"
+echo 'make install DESTDIR=$RPM_BUILD_ROOT'
+
+echo "%clean"
+echo '[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT'
+
+echo "%files"
+echo "%defattr(-,root,root,-)"
+echo "%doc"
+echo "%config(noreplace) %{_sysconfdir}/*.conf"
+echo "%{_libdir}/@PYTHON@/site-packages"
+echo "/etc/init.d/openvps-recv"
+echo "/usr/sbin/openvps-recv"
+echo "%dir /var/db/oh"

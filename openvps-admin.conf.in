@@ -1,0 +1,23 @@
+#
+# Sample OpenHosting configuration file
+#
+
+# This file must follow Python syntax. If you don't know Python,
+# don't worry about it, it's easy.
+
+# This file only lists the options that you are most likely to tweak.
+# There are more variables that you can look up in the oh/admin/dft.py
+# file your Python standard lib site-packages subdirectory.
+
+
+# The secret used for HMAC signing of mon packets sent from servers.
+
+MON_SECRET = 'Please change me!'
+
+
+###
+# do not edit this if you like using emacs
+# makes emacs go into python mode
+### Local Variables:
+### mode:python
+### End:
