@@ -1,0 +1,40 @@
+#
+# Copyright 2004 OpenHosting, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# $Id: Makefile.in,v 1.1 2005/03/30 21:45:49 grisha Exp $
+
+INSTALL=@INSTALL@
+TMPL=@prefix@/openvps/templates
+
+clean:
+	rm -rf *~
+
+distclean: clean
+	rm -f Makefile
+
+install:
+	$(INSTALL) -m 0644 main_frame.html $(DESTDIR)$(TMPL)/main_frame.html
+	$(INSTALL) -m 0644 global_menu.html $(DESTDIR)$(TMPL)/global_menu.html
+#	$(INSTALL) -m 0644 status_body.html $(DESTDIR)$(TMPL)/status_body.html
+#	$(INSTALL) -m 0644 traffic_body.html $(DESTDIR)$(TMPL)/traffic_body.html
+#	$(INSTALL) -m 0644 bwidth_body.html $(DESTDIR)$(TMPL)/bwidth_body.html
+#	$(INSTALL) -m 0644 cpu_body.html $(DESTDIR)$(TMPL)/cpu_body.html
+#	$(INSTALL) -m 0644 mem_body.html $(DESTDIR)$(TMPL)/mem_body.html
+#	$(INSTALL) -m 0644 disk_body.html $(DESTDIR)$(TMPL)/disk_body.html
+	$(INSTALL) -m 0644 login_body.html $(DESTDIR)$(TMPL)/login_body.html
+
+
+

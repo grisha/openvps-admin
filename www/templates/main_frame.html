@@ -1,0 +1,47 @@
+
+<html>
+ <head>
+  <title>OpenVPS Control Panel</title>
+
+  <style type="text/css" media="screen"> @import url(/images/ovstyle.css);</style>
+
+  <link rel="SHORTCUT ICON" href="/images/tiny_openvps.png">
+ </head>  
+
+<body>
+
+    <div class="container">
+
+    <h2>OpenVPS Control Panel 
+<%
+if name:
+    # begin
+%>
+    for server <em><%=name%></em></h2>
+<%
+#end
+else:
+    # begin
+%>
+    </h2>
+<%
+#end
+%>
+
+    <div class="container2">
+
+    <%=global_menu%>
+
+    <%=body%>
+
+    </div> <%-- container2 --%>
+
+    <div class="footer">
+    &copy; 2003-2005 OpenHosting, Inc. &nbsp;&nbsp; OpenVPS is a trademark of OpenHosting, Inc.
+    </div>
+
+    </div> <%-- container --%>
+
+</body>
+
+</html>
