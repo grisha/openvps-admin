@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.10 2004/12/30 20:49:32 grisha Exp $
+# $Id: openvps-recv,v 1.11 2005/01/10 19:12:49 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -263,10 +263,10 @@ def create_rrd(name):
          args.append(DS(field[0], dst=field[1], hbeat=field[2], min=field[3], max=field[4]))
         
    args.append(RRA('AVERAGE', xff=0.5, steps=1, rows=120))
-   args.append(RRA('AVERAGE', xff=0.5, steps=10, rows=144))
-   args.append(RRA('AVERAGE', xff=0.5, steps=60, rows=168))
-   args.append(RRA('AVERAGE', xff=0.5, steps=900, rows=144))
-   args.append(RRA('AVERAGE', xff=0.5, steps=4320, rows=144))
+   args.append(RRA('AVERAGE', xff=0.5, steps=5, rows=300))
+   args.append(RRA('AVERAGE', xff=0.5, steps=30, rows=400))
+   args.append(RRA('AVERAGE', xff=0.5, steps=450, rows=300))
+   args.append(RRA('AVERAGE', xff=0.5, steps=2160, rows=300))
    args.append(RRA('AVERAGE', xff=0.5, steps=43200, rows=120))
 
    log(`args`)
