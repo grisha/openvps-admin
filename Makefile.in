@@ -14,12 +14,12 @@
 # limitations under the License.
 #
 
-# $Id: Makefile.in,v 1.1 2004/12/24 03:26:17 grisha Exp $
+# $Id: Makefile.in,v 1.2 2004/12/24 05:39:14 grisha Exp $
 
 INSTALL=@INSTALL@
 SBINDIR=@prefix@/sbin
-VARDB=/var/db/oh
 CONFIG=/etc/openvps-admin.conf
+VARDB=/var/db/openvps
 VERSION=version.txt
 
 all:
@@ -27,6 +27,9 @@ all:
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(SBINDIR)
+	@if test ! -e $(DESTDIR)$(VARDB) ; then \
+		$(INSTALL) -d $(DESTDIR)$(VARDB); \
+	fi
 	cd scripts && $(MAKE) install
 	cd rhinit && $(MAKE) install
 	@$(MAKE) install_py_lib

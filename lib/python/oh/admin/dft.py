@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# $Id: dft.py,v 1.3 2004/12/24 03:57:45 grisha Exp $
+# $Id: dft.py,v 1.4 2004/12/24 05:39:14 grisha Exp $
 
 import os
 
@@ -32,6 +32,9 @@ CONFIG_DIR = '/etc'
 
 # Configuration file
 CONFIG_FILE = os.path.join(CONFIG_DIR, 'openvps-admin.conf')
+
+# Location of the rrd database
+VAR_DB_OH = '/var/db/openvps'
 
 # pid
 MON_PID_FILE = '/var/run/openvps-recv'

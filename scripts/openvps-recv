@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.6 2004/12/24 04:05:09 grisha Exp $
+# $Id: openvps-recv,v 1.7 2004/12/24 05:39:14 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -232,7 +232,62 @@ def decode(data):
       result[KEYS[n]] = list[n]
       
    return result
-                                                           
+
+
+# create our RRD
+
+import RRD
+
+def DS(name, dst, hbeat, min='U', max='U'):
+    return 'DS:%s:%s:%s:%s:%s' % (name, dst.upper(), hbeat, min, max)
+
+def RRA(cf, xff, steps, rows):
+    return 'RRA:%s:%s:%s:%s' % (cf.upper(), xff, steps, rows)
+
+def rrd_exists(name):
+   path = os.path.join(cfg.VAR_DB_OH, name+'.rrd')
+   return os.path.exists(path)
+
+def create_rrd(name):
+
+   path = os.path.join(cfg.VAR_DB_OH, name+'.rrd')
+
+   args = [path, '-s', '60']
+
+   for n in xrange(len(cfg.MON_DATA_DEF)):
+      field = cfg.MON_DATA_DEF[n]
+      if field[1]:
+         args.append(DS(field[0], dst=field[1], hbeat=field[2], min=field[3], max=field[4]))
+        
+   args.append(RRA('AVERAGE', xff=0.5, steps=1, rows=120))
+   args.append(RRA('AVERAGE', xff=0.5, steps=10, rows=144))
+   args.append(RRA('AVERAGE', xff=0.5, steps=60, rows=168))
+   args.append(RRA('AVERAGE', xff=0.5, steps=900, rows=144))
+   args.append(RRA('AVERAGE', xff=0.5, steps=4320, rows=144))
+   args.append(RRA('AVERAGE', xff=0.5, steps=43200, rows=120))
+
+   log(`args`)
+
+   RRD.create(args)
+
+def update_rrd(name, data):
+
+    # template
+    tmpl = []
+    for k in cfg.MON_DATA_DEF:
+        if k[1]:
+            tmpl.append(k[0])
+
+    vals = ['N']
+    for k in cfg.MON_DATA_DEF:
+        if k[1]:
+            vals.append('%s' % data[k[0]])
+
+    path = os.path.join(cfg.VAR_DB_OH, name+'.rrd')
+    args = [path, '-t'] + [':'.join(tmpl)] + [':'.join(vals)]
+
+    log(`args`)
+    RRD.update(args)
 
 def do_work():
 
@@ -249,9 +304,16 @@ def do_work():
       if not decoded:
          log('Invalid data received from %s : %s' % (addr[0], `data`))
       else:
-         # ZZZ
          log('Received from %s : %s' % (addr[0], `decoded`))
 
+         data = decoded
+         name =  data['hostname']
+
+         if not rrd_exists(name):
+            create_rrd(name)
+
+         update_rrd(name, data)
+         
       if EXIT:
          return
 
