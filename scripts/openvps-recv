@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.12 2005/01/10 19:14:32 grisha Exp $
+# $Id: openvps-recv,v 1.13 2005/03/01 03:11:45 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -37,7 +37,7 @@ import hmac
 import marshal
 
 # openvps modules
-from oh.admin import cfg
+from openvps.admin import cfg
 
 openlog('openvps-recv')
 

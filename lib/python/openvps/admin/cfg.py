@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# $Id: cfg.py,v 1.1 2005/01/12 21:25:19 grisha Exp $
+# $Id: cfg.py,v 1.2 2005/03/01 03:11:45 grisha Exp $
 
 def load_file(path):
     """Load a config file"""
@@ -34,7 +34,7 @@ def load_file(path):
     return locals
 
 
-from oh.common.cfg import *
+from openvps.common.cfg import *
 from dft import *
 
 locals().update(load_file(CONFIG_FILE))
