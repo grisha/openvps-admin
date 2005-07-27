@@ -15,9 +15,11 @@
 # limitations under the License.
 #
 
-# $Id: dft.py,v 1.1 2005/01/12 21:25:19 grisha Exp $
+# $Id: dft.py,v 1.2 2005/07/27 21:27:36 grisha Exp $
 
 import os
+import pwd
+import socket
 
 """ Configuration Defaults
 
@@ -38,3 +40,13 @@ VAR_DB_OH = '/var/db/openvps'
 
 # pid
 MON_PID_FILE = '/var/run/openvps-recv'
+
+# Whom to send e-mail to
+NOTIFY_EMAIL = ['root']
+
+# The From: of the notifications
+
+username = pwd.getpwuid(os.getuid())[0]
+hostname = socket.getfqdn()
+
+NOTIFY_FROM = "%s@%s" % (username, hostname) 
