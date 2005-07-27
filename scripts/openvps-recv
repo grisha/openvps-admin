@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.13 2005/03/01 03:11:45 grisha Exp $
+# $Id: openvps-recv,v 1.14 2005/07/27 21:06:45 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -35,6 +35,9 @@ from syslog import syslog, openlog
 
 import hmac
 import marshal
+
+from email.MIMEText import MIMEText
+import smtplib
 
 # openvps modules
 from openvps.admin import cfg
@@ -269,7 +272,7 @@ def create_rrd(name):
    args.append(RRA('AVERAGE', xff=0.5, steps=2160, rows=300))
    args.append(RRA('AVERAGE', xff=0.5, steps=43200, rows=120))
 
-   log(`args`)
+   #log(`args`)
 
    RRD.create(args)
 
@@ -289,25 +292,103 @@ def update_rrd(name, data):
     path = os.path.join(cfg.VAR_DB_OH, name+'.rrd')
     args = [path, '-t'] + [':'.join(tmpl)] + [':'.join(vals)]
 
-    log(`args`)
+    #log(`args`)
     RRD.update(args)
+
+HB = {}
+
+def update_heartbeat(name):
+
+   global HB
+
+   if HB.has_key(name) and not HB[name][4]:
+
+      # if there is err_cnt above, jump to else and start over
+
+      last_time, count, total_dur, avg, err_cnt = HB[name]
+
+      now = time.time()
+      count += 1L
+
+      if count < 10000:
+         # if count is > 10000, no point
+         # in updating the average
+         total_dur += (now - last_time)
+         avg = total_dur/count
+
+      HB[name] = [now, count, total_dur, avg, 0]
+         
+   else:
+      HB[name] = [time.time(), 0, 0, 0, 0]
+
+   #log('HEARTBEAT %s: %s' % (name, `HB[name]`))
+
+
+def email_notify(name, text):
+
+       msg = MIMEText(text)
+       msg['Subject'] = "%s is DOWN" % name
+       msg['From'] = 'openvps-recv Daemon <%s>' % cfg.NOTIFY_FROM
+       msg['to'] = ', '.join(cfg.NOTIFY_EMAIL)
+
+       s = smtplib.SMTP()
+       s.connect()
+       s.sendmail(cfg.NOTIFY_FROM, cfg.NOTIFY_EMAIL, msg.as_string())
+       s.close()
+
+       log("Email sent")
+                                                                                                                                                                                                     
+def check_heartbeats():
+
+   # do we have anyone that we have not heard from
+   # for longer than 3x the average?
+
+   global HB
+
+   MAX = 3
+   MAX_ERR = 3
+
+   for key in HB.keys():
+
+      last_time, count, total_dur, avg, err_cnt = HB[key]
+
+      if count > 2:
+
+         if (time.time() - last_time) / avg > MAX:
+
+            if err_cnt < MAX_ERR:
+
+               log("I have not heard from %s for %s seconds" % (key, time.time()-last_time))
+               email_notify(key, "I have not heard from %s for %s seconds" % (key, time.time()-last_time))
+               HB[key] = [last_time, count, total_dur, avg, err_cnt+1]
+   
 
 def do_work():
 
    global EXIT
 
    udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+   udp_sock.settimeout(10.0)
    udp_sock.bind(('0.0.0.0', cfg.MON_TARGET_PORT))
 
    while 1:
-      data, addr = udp_sock.recvfrom(1024)
+
+      try:
+         data, addr = udp_sock.recvfrom(1024)
+      except socket.timeout:
+         log("TIMEDOUT!")
+         check_heartbeats()
+         continue
+      
+      log("GOT %s from %s" % (`data`, `addr`))
 
       decoded = decode(data)
 
       if not decoded:
          log('Invalid data received from %s : %s' % (addr[0], `data`))
       else:
-         log('Received from %s : %s' % (addr[0], `decoded`))
+         #log('Received from %s : %s' % (addr[0], `decoded`))
+         pass
 
          data = decoded
          name =  data['hostname']
@@ -316,6 +397,9 @@ def do_work():
             create_rrd(name)
 
          update_rrd(name, data)
+
+         update_heartbeat(name)
+         check_heartbeats()
          
       if EXIT:
          return
