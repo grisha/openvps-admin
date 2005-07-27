@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.14 2005/07/27 21:06:45 grisha Exp $
+# $Id: openvps-recv,v 1.15 2005/07/27 21:13:59 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -376,12 +376,11 @@ def do_work():
       try:
          data, addr = udp_sock.recvfrom(1024)
       except socket.timeout:
-         log("TIMEDOUT!")
+         # if there is nothing coming in, this will kick in and still
+         # continue checking heartbeats
          check_heartbeats()
          continue
       
-      log("GOT %s from %s" % (`data`, `addr`))
-
       decoded = decode(data)
 
       if not decoded:
