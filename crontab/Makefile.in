@@ -1,5 +1,5 @@
 #
-# Copyright 2004 OpenHosting, Inc.
+# Copyright 2005 OpenHosting, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
 # limitations under the License.
 #
 
-# $Id: Makefile.in,v 1.2 2005/09/08 14:53:04 grisha Exp $
+# $Id: Makefile.in,v 1.1 2005/09/08 14:53:04 grisha Exp $
 
 INSTALL=@INSTALL@
-SBINDIR=@prefix@/sbin
 
 clean:
 	rm -rf *~
@@ -25,6 +24,5 @@ clean:
 distclean: clean
 	rm -f Makefile
 
-install: 
-	$(INSTALL) -m 0550 openvps-recv $(DESTDIR)$(SBINDIR)/openvps-recv
-	$(INSTALL) -m 0550 ovacheckproc $(DESTDIR)$(SBINDIR)/ovacheckproc
+install:
+	$(INSTALL) -m 644 openvps-admin $(DESTDIR)/etc/cron.d/openvps-admin

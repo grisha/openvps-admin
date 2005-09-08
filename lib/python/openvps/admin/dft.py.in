@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# $Id: dft.py,v 1.2 2005/07/27 21:27:36 grisha Exp $
+# $Id: dft.py.in,v 1.1 2005/09/08 14:53:04 grisha Exp $
 
 import os
 import pwd
@@ -28,6 +28,9 @@ file. This file is by default /etc/openvps.conf (look below
 for CONFIG_FILE for the exact value).
 
 """
+
+# PREFIX
+PREFIX = '@prefix@'
 
 # Configuration directory
 CONFIG_DIR = '/etc'

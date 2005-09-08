@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# $Id: Makefile.in,v 1.1 2005/03/30 21:40:14 grisha Exp $
+# $Id: Makefile.in,v 1.2 2005/09/08 14:53:04 grisha Exp $
 
 INSTALL=@INSTALL@
 
@@ -25,6 +25,6 @@ distclean: clean
 	rm -f Makefile
 
 install:
-	$(INSTALL) -m 0644 openvps-admin.conf $(DESTDIR)/etc/httpd/conf.d/openvps-admin.conf
+#	$(INSTALL) -m 0644 openvps-admin.conf $(DESTDIR)/etc/httpd/conf.d/openvps-admin.conf
 
 

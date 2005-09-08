@@ -1,3 +1,4 @@
+
 #!/bin/sh
 
 #
@@ -16,7 +17,7 @@
 # limitations under the License.
 #
 
-# $Id: mkspec.in,v 1.4 2005/03/01 04:12:29 grisha Exp $
+# $Id: mkspec.in,v 1.5 2005/09/08 14:53:04 grisha Exp $
 
 # Output a spec file for an RPM
 
@@ -53,6 +54,7 @@ echo "make"
 echo "%install"
 echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/etc/init.d"
 echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/etc/httpd/conf.d"
+echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/etc/cron.d"
 echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/usr/openvps/templates"
 echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/usr/openvps/images"
 echo "mkdir -p -m 755 \$RPM_BUILD_ROOT/var/db/openvps"
@@ -66,8 +68,10 @@ echo "%files"
 echo "%defattr(-,root,root,-)"
 echo "%doc"
 echo "%config(noreplace) %{_sysconfdir}/*.conf"
-echo "%config(noreplace) %{_sysconfdir}/httpd/conf.d/*.conf"
+echo "%config(noreplace) %{_sysconfdir}/cron.d"
+#echo "%config(noreplace) %{_sysconfdir}/httpd/conf.d/*.conf"
 echo "%{_libdir}/@PYTHON@/site-packages"
 echo "/etc/init.d/openvps-recv"
 echo "/usr/sbin/openvps-recv"
+echo "/usr/sbin/ovacheckproc"
 echo "%dir /var/db/openvps"
