@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.17 2005/09/20 18:01:56 grisha Exp $
+# $Id: openvps-recv,v 1.18 2005/09/20 21:01:50 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -48,6 +48,8 @@ def log(data):
    syslog('%s' % data)
 
 EXIT = 0
+
+HB = {}
 
 def exit_handler(signum, frame):
    global EXIT
@@ -259,6 +261,7 @@ def rrd_exists(name):
    path = os.path.join(cfg.VAR_DB_OH, name+'.rrd')
    return os.path.exists(path)
 
+
 def create_rrd(name):
 
    path = os.path.join(cfg.VAR_DB_OH, name+'.rrd')
@@ -270,6 +273,32 @@ def create_rrd(name):
       if field[1]:
          args.append(DS(field[0][:19], dst=field[1], hbeat=field[2], min=field[3], max=field[4]))
         
+   args.append(RRA('AVERAGE', xff=0.5, steps=1, rows=120))
+   args.append(RRA('AVERAGE', xff=0.5, steps=5, rows=300))
+   args.append(RRA('AVERAGE', xff=0.5, steps=30, rows=400))
+   args.append(RRA('AVERAGE', xff=0.5, steps=450, rows=300))
+   args.append(RRA('AVERAGE', xff=0.5, steps=2160, rows=300))
+   args.append(RRA('AVERAGE', xff=0.5, steps=43200, rows=120))
+
+   #log(`args`)
+
+   RRD.create(args)
+
+
+def uptime_rrd_exists(name):
+   path = os.path.join(cfg.VAR_DB_OH, name+'-uptime.rrd')
+   return os.path.exists(path)
+
+
+def create_uptime_rrd(name):
+
+   path = os.path.join(cfg.VAR_DB_OH, name+'-uptime.rrd')
+
+   args = [path, '-s', '60']
+
+   args.append(DS('uptime', dst='gauge', hbeat=300, min=0, max=100))
+   args.append(DS('admin_uptime', dst='gauge', hbeat=300, min=0, max=100))
+
    args.append(RRA('AVERAGE', xff=0.5, steps=1, rows=120))
    args.append(RRA('AVERAGE', xff=0.5, steps=5, rows=300))
    args.append(RRA('AVERAGE', xff=0.5, steps=30, rows=400))
@@ -303,7 +332,20 @@ def update_rrd(name, data):
     except ValueError, e:
        log('WARNING: RRD update failed (%s): %s' % (e, `args`))
 
-HB = {}
+
+def update_uptime_rrd(name, up, admin_up):
+
+    tmpl = 'uptime:admin_uptime'
+    vals = 'N:%d:%d' % (up, admin_up)
+
+    path = os.path.join(cfg.VAR_DB_OH, name+'-uptime.rrd')
+    args = [path, '-t', tmpl, vals]
+
+    #log(`args`)
+    try:
+       RRD.update(args)
+    except ValueError, e:
+       log('WARNING: RRD update failed (%s): %s' % (e, `args`))
 
 def update_heartbeat(name):
 
@@ -313,7 +355,7 @@ def update_heartbeat(name):
 
       # if there is err_cnt above, jump to else and start over
 
-      last_time, count, total_dur, avg, err_cnt = HB[name]
+      last_time, count, total_dur, avg, err_cnt, admin_down = HB[name]
 
       now = time.time()
       count += 1L
@@ -324,16 +366,18 @@ def update_heartbeat(name):
          total_dur += (now - last_time)
          avg = total_dur/count
 
-      HB[name] = [now, count, total_dur, avg, 0]
+      HB[name] = [now, count, total_dur, avg, 0, False]
          
    else:
       log('New HB entry started for %s' % name)
-      HB[name] = [time.time(), 0, 0, 0, 0]
+      HB[name] = [time.time(), 0, 0, 0, 0, False]
 
    #log('HEARTBEAT %s: %s' % (name, `HB[name]`))
 
 
 def email_notify(name, text):
+
+   if cfg.NOTIFY_EMAIL:
 
        msg = MIMEText(text)
        msg['Subject'] = "%s is DOWN" % name
@@ -345,7 +389,7 @@ def email_notify(name, text):
        s.sendmail(cfg.NOTIFY_FROM, cfg.NOTIFY_EMAIL, msg.as_string())
        s.close()
 
-       log("Email sent")
+       log("Email sent to %s" % cfg.NOTIFY_EMAIL)
                                                                                                                                                                                                      
 def check_heartbeats():
 
@@ -354,22 +398,40 @@ def check_heartbeats():
 
    global HB
 
-   MAX = 3
-   MAX_ERR = 3
+   MAX = 3 # 3 times the average
+   MAX_ERR = 1 # number of notifications
+   JITTER = 10 # seconds you can be late before being marked as down
 
    for key in HB.keys():
 
-      last_time, count, total_dur, avg, err_cnt = HB[key]
+      last_time, count, total_dur, avg, err_cnt, admin_down = HB[key]
 
-      if count > 2:
+      if count > 2: # anything less does not give a meaningful average
 
-         if (time.time() - last_time) / avg > MAX:
+         now = time.time()
+
+         if (now - last_time) > avg + JITTER:
+
+            # we are more than JITTER late, mark us down
+
+            if admin_down:
+               # we're down, but intentionally
+               update_uptime_rrd(key, 0, 100)
+            else:
+               # we're down unintentionally
+               update_uptime_rrd(key, 0, 0)
+
+
+         if not admin_down and ((time.time() - last_time) / avg > MAX):
+
+            # it's been so long, time to send an e-mail
 
             if err_cnt < MAX_ERR:
-
+               # but not if the max number of e-mails was sent
+               
                log("I have not heard from %s for %s seconds" % (key, time.time()-last_time))
                email_notify(key, "I have not heard from %s for %s seconds" % (key, time.time()-last_time))
-               HB[key] = [last_time, count, total_dur, avg, err_cnt+1]
+               HB[key] = [last_time, count, total_dur, avg, err_cnt+1, admin_down]
    
 
 def do_work():
@@ -410,9 +472,9 @@ def do_work():
 
                global HB
                if HB.has_key(name):
-                  del HB[name]
+                  HB[name][5] = True # administratively down
 
-               log('Received MON_CMD_ADMIN_DOWN from %s, disabled HB check until next packet' % name)
+               log('Received MON_CMD_ADMIN_DOWN from %s.' % name)
 
          else:
 
@@ -421,9 +483,14 @@ def do_work():
             if not rrd_exists(name):
                create_rrd(name)
 
+            if not uptime_rrd_exists(name):
+               create_uptime_rrd(name)
+
             update_rrd(name, data)
 
+            update_uptime_rrd(name, 100, 100) # fully up
             update_heartbeat(name)
+
             check_heartbeats()
          
       if EXIT:
