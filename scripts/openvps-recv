@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.16 2005/09/08 14:53:04 grisha Exp $
+# $Id: openvps-recv,v 1.17 2005/09/20 18:01:56 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -230,6 +230,11 @@ def decode(data):
 
    list = marshal.loads(data)
 
+   if len(list) == 3:
+      # this is a special command packet
+      # return it as is
+      return list
+
    result = {}
    for n in xrange(len(KEYS)):
       if n < len(list) and list[n] is not None:
@@ -293,7 +298,10 @@ def update_rrd(name, data):
     args = [path, '-t'] + [':'.join(tmpl)] + [':'.join(vals)]
 
     #log(`args`)
-    RRD.update(args)
+    try:
+       RRD.update(args)
+    except ValueError, e:
+       log('WARNING: RRD update failed (%s): %s' % (e, `args`))
 
 HB = {}
 
@@ -319,6 +327,7 @@ def update_heartbeat(name):
       HB[name] = [now, count, total_dur, avg, 0]
          
    else:
+      log('New HB entry started for %s' % name)
       HB[name] = [time.time(), 0, 0, 0, 0]
 
    #log('HEARTBEAT %s: %s' % (name, `HB[name]`))
@@ -387,18 +396,35 @@ def do_work():
          log('Invalid data received from %s : %s' % (addr[0], `data`))
       else:
          #log('Received from %s : %s' % (addr[0], `decoded`))
-         pass
-
          data = decoded
-         name =  data['hostname']
 
-         if not rrd_exists(name):
-            create_rrd(name)
+         # is this a command packet?
+         if len(data) == 3:
 
-         update_rrd(name, data)
+            name =  data[0]
 
-         update_heartbeat(name)
-         check_heartbeats()
+            if data[1] == cfg.MON_CMD_ADMIN_DOWN:
+
+               # delete the entry for this host, thereby disabling the
+               # heartbeat check
+
+               global HB
+               if HB.has_key(name):
+                  del HB[name]
+
+               log('Received MON_CMD_ADMIN_DOWN from %s, disabled HB check until next packet' % name)
+
+         else:
+
+            name =  data['hostname']
+
+            if not rrd_exists(name):
+               create_rrd(name)
+
+            update_rrd(name, data)
+
+            update_heartbeat(name)
+            check_heartbeats()
          
       if EXIT:
          return
