@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.18 2005/09/20 21:01:50 grisha Exp $
+# $Id: openvps-recv,v 1.19 2005/09/23 19:28:05 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -398,9 +398,8 @@ def check_heartbeats():
 
    global HB
 
-   MAX = 3 # 3 times the average
+   MAX = 3 # 3 times the average is considered down
    MAX_ERR = 1 # number of notifications
-   JITTER = 10 # seconds you can be late before being marked as down
 
    for key in HB.keys():
 
@@ -410,9 +409,10 @@ def check_heartbeats():
 
          now = time.time()
 
-         if (now - last_time) > avg + JITTER:
 
-            # we are more than JITTER late, mark us down
+         if not admin_down and ((time.time() - last_time) / avg > MAX):
+
+            # it's been so long, it's down
 
             if admin_down:
                # we're down, but intentionally
@@ -421,10 +421,7 @@ def check_heartbeats():
                # we're down unintentionally
                update_uptime_rrd(key, 0, 0)
 
-
-         if not admin_down and ((time.time() - last_time) / avg > MAX):
-
-            # it's been so long, time to send an e-mail
+            # send a notification
 
             if err_cnt < MAX_ERR:
                # but not if the max number of e-mails was sent
