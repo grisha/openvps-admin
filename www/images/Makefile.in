@@ -14,10 +14,10 @@
 # limitations under the License.
 #
 
-# $Id: Makefile.in,v 1.1 2005/03/30 21:43:27 grisha Exp $
+# $Id: Makefile.in,v 1.2 2005/09/27 20:52:19 grisha Exp $
 
 INSTALL=@INSTALL@
-IMGS=@prefix@/openvps/images
+IMAGES=@prefix@/openvps-admin/www/images
 
 clean:
 	rm -rf *~
@@ -26,7 +26,12 @@ distclean: clean
 	rm -f Makefile
 
 install:
-	$(INSTALL) -m 0644 ovstyle.css $(DESTDIR)$(IMGS)/ovstyle.css
+	$(INSTALL) -d $(DESTDIR)$(IMAGES)
+	@for f in `ls *.gif *.png *.jpg *.jpeg`; do \
+		echo $(INSTALL) -m 0644 $$f $(DESTDIR)$(IMAGES)/$$f ; \
+		$(INSTALL) -m 0644 $$f $(DESTDIR)$(IMAGES)/$$f ; \
+	done
+
 
 
 

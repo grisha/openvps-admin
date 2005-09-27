@@ -14,22 +14,28 @@
 # limitations under the License.
 #
 
-# $Id: Makefile.in,v 1.1 2005/03/30 21:42:03 grisha Exp $
+# $Id: Makefile.in,v 1.2 2005/09/27 20:52:19 grisha Exp $
+
+WWW=@prefix@/openvps-admin/www
 
 install: 
+	$(INSTALL) -d $(DESTDIR)$(WWW)
 	cd conf && $(MAKE) install
-#	cd templates && $(MAKE) install
-#	cd images && $(MAKE) install
+	cd templates && $(MAKE) install
+	cd images && $(MAKE) install
+	cd html && $(MAKE) install
 
 clean:
 	cd conf && $(MAKE) clean
-#	cd templates && $(MAKE) clean
-#	cd images && $(MAKE) clean
+	cd templates && $(MAKE) clean
+	cd images && $(MAKE) clean
+	cd html && $(MAKE) clean
 	rm -rf *~ 
 
 distclean: clean
 	cd conf && $(MAKE) distclean
-#	cd templates && $(MAKE) distclean
-#	cd images && $(MAKE) distclean
+	cd templates && $(MAKE) distclean
+	cd images && $(MAKE) distclean
+	cd html && $(MAKE) distclean
 	rm -rf Makefile 
 

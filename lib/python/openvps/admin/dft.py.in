@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-# $Id: dft.py.in,v 1.1 2005/09/08 14:53:04 grisha Exp $
+# $Id: dft.py.in,v 1.2 2005/09/27 20:52:19 grisha Exp $
 
 import os
 import pwd
@@ -53,3 +53,13 @@ username = pwd.getpwuid(os.getuid())[0]
 hostname = socket.getfqdn()
 
 NOTIFY_FROM = "%s@%s" % (username, hostname) 
+
+# user/password for the site
+WWW_USER = 'ovadmin'
+WWW_PASSWD = '*'
+
+# makes emacs go into python mode
+### Local Variables:
+### mode:python
+### End:
+

@@ -14,51 +14,36 @@
 # limitations under the License.
 #
 
-# $Id: openvps-admin.conf.in,v 1.1 2005/03/30 21:40:14 grisha Exp $
+# $Id: openvps-admin.conf.in,v 1.2 2005/09/27 20:52:19 grisha Exp $
 
 <IfModule !mod_python.c>
   LoadModule python_module modules/mod_python.so
 </IfModule>
 
-<IfModule mod_python.c>
+Alias /ovadmin/images @prefix@/openvps-admin/www/images
 
-  SetHandler mod_python
+<Directory @prefix@/openvps-admin/www/images>
 
-  PythonDebug Off
-  PythonHandler openvps.www_admin.panel
+  SetHandler None
+  Options -Indexes
 
-  Alias /images @prefix@/openvps/images
-  <Directory @prefix@/openvps/images>
-    SetHandler None
-    Options -Indexes
-    Allow from all
-    Satisfy Any
-  </Directory>
+</Directory>
 
-</IfModule>
+Alias /ovadmin @prefix@/openvps-admin/www/html
 
-<VirtualHost *:443>
+<Directory @prefix@/openvps-admin/www/html>
 
-  ServerName host
+  <IfModule mod_python.c>
 
-  ErrorLog logs/ssl_error_log
-  TransferLog logs/ssl_access_log
-  SSLEngine on
-  SSLCipherSuite ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP
-  SSLCertificateFile /etc/httpd/conf/ssl.crt/server.crt
-  SSLCertificateKeyFile /etc/httpd/conf/ssl.key/server.key
+    SetHandler mod_python
+
+    PythonDebug Off
+    PythonHandler mod_python.publisher
+
+  </IfModule>
+
+</Directory>
 
 
-  # The next line should really point to your CA certificate, which
-  # you must generate manually, keep the private key offline and share it
-  # across hosts. It can be generated with something like:
-  #  openssl req -new -x509 -keyout openvps-ca.pem -out openvps-ca.key
-  #
-  #SSLCACertificateFile /etc/openvps-ca.pem
-
-  SSLVerifyClient require
-  SSLVerifyDepth 1
-
-</VirtualHost>
 
 

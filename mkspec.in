@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-# $Id: mkspec.in,v 1.5 2005/09/08 14:53:04 grisha Exp $
+# $Id: mkspec.in,v 1.6 2005/09/27 20:52:19 grisha Exp $
 
 # Output a spec file for an RPM
 
@@ -69,9 +69,10 @@ echo "%defattr(-,root,root,-)"
 echo "%doc"
 echo "%config(noreplace) %{_sysconfdir}/*.conf"
 echo "%config(noreplace) %{_sysconfdir}/cron.d"
-#echo "%config(noreplace) %{_sysconfdir}/httpd/conf.d/*.conf"
+echo "%config(noreplace) %{_sysconfdir}/httpd/conf.d/*.conf"
 echo "%{_libdir}/@PYTHON@/site-packages"
 echo "/etc/init.d/openvps-recv"
 echo "/usr/sbin/openvps-recv"
 echo "/usr/sbin/ovacheckproc"
+echo "/usr/openvps-admin"
 echo "%dir /var/db/openvps"

@@ -2601,7 +2601,7 @@ fi
 
 # final output
 
-                                                                                                                                  ac_config_files="$ac_config_files Makefile mkspec rhinit/Makefile scripts/Makefile openvps-admin.conf rhinit/openvps-recv www/conf/openvps-admin.conf www/Makefile www/conf/Makefile www/images/Makefile www/templates/Makefile lib/python/openvps/admin/dft.py crontab/Makefile"
+                                                                                                                                            ac_config_files="$ac_config_files Makefile mkspec rhinit/Makefile scripts/Makefile openvps-admin.conf rhinit/openvps-recv www/conf/openvps-admin.conf www/Makefile www/conf/Makefile www/images/Makefile www/templates/Makefile www/html/Makefile lib/python/openvps/admin/dft.py crontab/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -3164,6 +3164,7 @@ do
   "www/conf/Makefile" ) CONFIG_FILES="$CONFIG_FILES www/conf/Makefile" ;;
   "www/images/Makefile" ) CONFIG_FILES="$CONFIG_FILES www/images/Makefile" ;;
   "www/templates/Makefile" ) CONFIG_FILES="$CONFIG_FILES www/templates/Makefile" ;;
+  "www/html/Makefile" ) CONFIG_FILES="$CONFIG_FILES www/html/Makefile" ;;
   "lib/python/openvps/admin/dft.py" ) CONFIG_FILES="$CONFIG_FILES lib/python/openvps/admin/dft.py" ;;
   "crontab/Makefile" ) CONFIG_FILES="$CONFIG_FILES crontab/Makefile" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
