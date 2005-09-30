@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.19 2005/09/23 19:28:05 grisha Exp $
+# $Id: openvps-recv,v 1.20 2005/09/30 18:49:43 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -258,13 +258,13 @@ def RRA(cf, xff, steps, rows):
     return 'RRA:%s:%s:%s:%s' % (cf.upper(), xff, steps, rows)
 
 def rrd_exists(name):
-   path = os.path.join(cfg.VAR_DB_OH, name+'.rrd')
+   path = os.path.join(cfg.VAR_DB_OPENVPS, name+'.rrd')
    return os.path.exists(path)
 
 
 def create_rrd(name):
 
-   path = os.path.join(cfg.VAR_DB_OH, name+'.rrd')
+   path = os.path.join(cfg.VAR_DB_OPENVPS, name+'.rrd')
 
    args = [path, '-s', '60']
 
@@ -286,23 +286,25 @@ def create_rrd(name):
 
 
 def uptime_rrd_exists(name):
-   path = os.path.join(cfg.VAR_DB_OH, name+'-uptime.rrd')
+   path = os.path.join(cfg.VAR_DB_OPENVPS, name+'-uptime.rrd')
    return os.path.exists(path)
 
 
 def create_uptime_rrd(name):
 
-   path = os.path.join(cfg.VAR_DB_OH, name+'-uptime.rrd')
+   path = os.path.join(cfg.VAR_DB_OPENVPS, name+'-uptime.rrd')
 
    args = [path, '-s', '60']
 
    args.append(DS('uptime', dst='gauge', hbeat=300, min=0, max=100))
    args.append(DS('admin_uptime', dst='gauge', hbeat=300, min=0, max=100))
 
-   args.append(RRA('AVERAGE', xff=0.5, steps=1, rows=120))
-   args.append(RRA('AVERAGE', xff=0.5, steps=5, rows=300))
-   args.append(RRA('AVERAGE', xff=0.5, steps=30, rows=400))
-   args.append(RRA('AVERAGE', xff=0.5, steps=450, rows=300))
+   # for uptime we use a slightly more detailed RRD
+
+   args.append(RRA('AVERAGE', xff=0.5, steps=1, rows=120))         # 2   hours of 1 min
+   args.append(RRA('AVERAGE', xff=0.5, steps=5, rows=3000))        # 10   day of 5 min
+   args.append(RRA('AVERAGE', xff=0.5, steps=30, rows=1600))       # 33 days of 30 min
+   args.append(RRA('AVERAGE', xff=0.5, steps=450, rows=300))       # 93  days of 7.5 hr
    args.append(RRA('AVERAGE', xff=0.5, steps=2160, rows=300))
    args.append(RRA('AVERAGE', xff=0.5, steps=43200, rows=120))
 
@@ -323,7 +325,7 @@ def update_rrd(name, data):
         if k[1]:
             vals.append('%s' % data[k[0]])
 
-    path = os.path.join(cfg.VAR_DB_OH, name+'.rrd')
+    path = os.path.join(cfg.VAR_DB_OPENVPS, name+'.rrd')
     args = [path, '-t'] + [':'.join(tmpl)] + [':'.join(vals)]
 
     #log(`args`)
@@ -338,7 +340,7 @@ def update_uptime_rrd(name, up, admin_up):
     tmpl = 'uptime:admin_uptime'
     vals = 'N:%d:%d' % (up, admin_up)
 
-    path = os.path.join(cfg.VAR_DB_OH, name+'-uptime.rrd')
+    path = os.path.join(cfg.VAR_DB_OPENVPS, name+'-uptime.rrd')
     args = [path, '-t', tmpl, vals]
 
     #log(`args`)
