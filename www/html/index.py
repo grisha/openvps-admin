@@ -97,7 +97,8 @@ def uptime_graph(req, s='-2592000'): # 30 days
     os.close(tfile)
 
     args = [tpath, '--start', s, '--imgformat=PNG', '--width=600',
-            '--base=1000', '--height=120', '--interlaced', '--lower-limit', '80', '--rigid']
+            '--base=1000', '--height=120', '--interlaced',
+            '--lower-limit', '80', '--rigid', '--upper-limit', '105']
 
     rrds = _list_server_rrds()
 
