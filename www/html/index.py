@@ -54,11 +54,14 @@ def _list_server_rrds():
 
         result.append(path)
 
+    result.sort()
+        
     return result
 
 def uptime(req, s='-2592000'): # 30 days
 
-    args = ['/dev/null', '--start', s]
+    args = ['/dev/null', '--start', s,
+            '--width=500'] # bizzare, but we need --width to match
 
     rrds = _list_server_rrds()
 
@@ -87,6 +90,8 @@ def uptime(req, s='-2592000'): # 30 days
     args.append('PRINT:tot_avg:"average uptime\\: %9.6lf"')
 
     uptime = RRD.graph(*args)[2][0][1:-1]
+
+    req.log_error(`args`)
 
     return uptime
  
