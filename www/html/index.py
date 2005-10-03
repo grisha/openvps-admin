@@ -98,7 +98,8 @@ def uptime_graph(req, s='-2592000'): # 30 days
 
     args = [tpath, '--start', s, '--imgformat=PNG', '--width=600',
             '--base=1000', '--height=120', '--interlaced',
-            '--lower-limit', '80', '--rigid', '--upper-limit', '105']
+            '--lower-limi', '80',
+            '--upper-limit', '101', '--rigid']
 
     rrds = _list_server_rrds()
 
@@ -123,7 +124,7 @@ def uptime_graph(req, s='-2592000'): # 30 days
     # the average
     args.append('VDEF:tot_avg=avg,AVERAGE')
 
-    trend = 60*60*24*30 # 30 days
+    trend = 60*60*24*7 # 7 days
 
     # trended average
     args.append('CDEF:tavg=avg,%d,TREND' % trend)
@@ -137,7 +138,7 @@ def uptime_graph(req, s='-2592000'): # 30 days
     args.append('AREA:degr#ffff99:degraded (less than %s)\\n' % degr)
 
     # tranded average
-    args.append('LINE3:tavg#0000FF:%d day moving average\\n' % (trend / (60*60*24)))
+    args.append('LINE2:tavg#0000FF:%d day moving average\\n' % (trend / (60*60*24)))
                 
     # real uptime
     args.append('LINE:avg#00FF00:simple average\\n')
