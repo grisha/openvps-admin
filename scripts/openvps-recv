@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.20 2005/09/30 18:49:43 grisha Exp $
+# $Id: openvps-recv,v 1.21 2005/10/24 20:13:59 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -30,8 +30,9 @@ import signal
 import time
 import socket
 import traceback
+import syslog
 from signal import SIGTERM, SIGKILL
-from syslog import syslog, openlog
+from exceptions import ImportError
 
 import hmac
 import marshal
@@ -42,10 +43,26 @@ import smtplib
 # openvps modules
 from openvps.admin import cfg
 
-openlog('openvps-recv')
-
 def log(data):
-   syslog('%s' % data)
+   syslog.openlog('openvps-recv')
+   syslog.syslog('%s' % data)
+   syslog.closelog()
+
+# alertdb (if present)
+alertdb = None
+try:
+   import alertdb
+except ImportError:
+   pass
+
+if cfg.ALERT_HOST:
+
+   if alertdb:
+      # initialize alert server connection
+      alertdb.alert_server_open(server=cfg.ALERT_HOST, user=cfg.ALERT_USER,
+                                passwd=cfg.ALERT_PASSWD, dbname=cfg.ALERT_DBNAME)
+   else:
+      log('WARNING: ALERT_HOST specified, but alertdb not installed')
 
 EXIT = 0
 
@@ -199,6 +216,9 @@ def startstop(pidfile='%s.pid' % os.path.basename(sys.argv[0])):
             
          daemonize(pidfile=pidfile)
          log('Started.')
+         if alertdb:
+            alertdb.send_alert(':openvps-recv:start', severity=alertdb.SEV_CLEAR,
+                               text='openvps-recv started')
          return
 
    print "usage: %s start|stop|restart" % sys.argv[0]
@@ -217,6 +237,9 @@ def work():
          log(e[:-1])
       
    log('Exiting...')
+   if alertdb:
+      alertdb.send_alert(':openvps-recv:exit', severity=alertdb.SEV_WARN,
+                         text='openvps-recv exited')
    sys.exit(1)
 
 KEYS = [x[0] for x in cfg.MON_DATA_DEF]
@@ -333,7 +356,9 @@ def update_rrd(name, data):
        RRD.update(args)
     except ValueError, e:
        log('WARNING: RRD update failed (%s): %s' % (e, `args`))
-
+       if alertdb:
+          alertdb.send_alert(':openvps-recv:rrdup', severity=alertdb.SEV_CRIT,
+                             text='%s RRD update failed, see syslog' % sys.argv[0])
 
 def update_uptime_rrd(name, up, admin_up):
 
@@ -348,6 +373,9 @@ def update_uptime_rrd(name, up, admin_up):
        RRD.update(args)
     except ValueError, e:
        log('WARNING: RRD update failed (%s): %s' % (e, `args`))
+       if alertdb:
+          alertdb.send_alert(':openvps-recv:rrdup', severity=alertdb.SEV_CRIT,
+                             text='%s RRD update failed, see syslog' % sys.argv[0])
 
 def update_heartbeat(name):
 
@@ -372,6 +400,10 @@ def update_heartbeat(name):
          
    else:
       log('New HB entry started for %s' % name)
+      if alertdb:
+         alertdb.send_alert(':openvps-recv:%s:newhb' % name, severity=alertdb.SEV_CLEAR,
+                            text='new HB entry started for %s' % name)
+
       HB[name] = [time.time(), 0, 0, 0, 0, False]
 
    #log('HEARTBEAT %s: %s' % (name, `HB[name]`))
@@ -392,13 +424,23 @@ def email_notify(name, text):
        s.close()
 
        log("Email sent to %s" % cfg.NOTIFY_EMAIL)
-                                                                                                                                                                                                     
+
+
+LAST_HB_CHECK = 0
+
 def check_heartbeats():
 
    # do we have anyone that we have not heard from
    # for longer than 3x the average?
 
    global HB
+   global LAST_HB_CHECK
+
+   # pace heartbeat checks to no more than once per 10 secs
+   if (time.time() - LAST_HB_CHECK) < 10:
+      return
+   else:
+      LAST_HB_CHECK = time.time()
 
    MAX = 3 # 3 times the average is considered down
    MAX_ERR = 1 # number of notifications
@@ -410,7 +452,6 @@ def check_heartbeats():
       if count > 2: # anything less does not give a meaningful average
 
          now = time.time()
-
 
          if not admin_down and ((time.time() - last_time) / avg > MAX):
 
@@ -427,9 +468,17 @@ def check_heartbeats():
 
             if err_cnt < MAX_ERR:
                # but not if the max number of e-mails was sent
+
+               text = "I have not heard from %s for %s seconds" % (key, time.time()-last_time)
                
-               log("I have not heard from %s for %s seconds" % (key, time.time()-last_time))
-               email_notify(key, "I have not heard from %s for %s seconds" % (key, time.time()-last_time))
+               log(text)
+
+               if alertdb:
+                  alertdb.send_alert(key+':heartbeat', severity=alertdb.SEV_CRIT,
+                                     text=text, node_name=key)
+                  
+               email_notify(key, text)
+               
                HB[key] = [last_time, count, total_dur, avg, err_cnt+1, admin_down]
    
 
@@ -455,6 +504,9 @@ def do_work():
 
       if not decoded:
          log('Invalid data received from %s : %s' % (addr[0], `data`))
+         if alertdb:
+            alertdb.send_alert(':openvps-recv:%s:baddata' % addr[0], severity=alertdb.SEV_CRIT, 
+                               text='openvps-recv: invalid data received from %s, see syslog' % addr[0])
       else:
          #log('Received from %s : %s' % (addr[0], `decoded`))
          data = decoded
@@ -474,6 +526,9 @@ def do_work():
                   HB[name][5] = True # administratively down
 
                log('Received MON_CMD_ADMIN_DOWN from %s.' % name)
+               if alertdb:
+                  alertdb.send_alert(':openvps-recv:%s:admindown' % addr[0], severity=alertdb.SEV_WARN, 
+                                     text='openvps-recv received MON_CMD_ADMIN_DOWN from %s' % name)
 
          else:
 
@@ -507,6 +562,9 @@ if __name__ == "__main__":
          log(e[:-1])
       
       log('Exiting...')
+      if alertdb:
+         alertdb.send_alert(':openvps-recv:exit', severity=alertdb.SEV_MAJOR, 
+                            text='openvps-recv exited')
       sys.exit(1)
 
    # start working
