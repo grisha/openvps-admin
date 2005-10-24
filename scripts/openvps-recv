@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.21 2005/10/24 20:13:59 grisha Exp $
+# $Id: openvps-recv,v 1.22 2005/10/24 21:03:29 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -55,14 +55,14 @@ try:
 except ImportError:
    pass
 
-if cfg.ALERT_HOST:
+if cfg.ALERT_DBNAME:
 
    if alertdb:
       # initialize alert server connection
       alertdb.alert_server_open(server=cfg.ALERT_HOST, user=cfg.ALERT_USER,
                                 passwd=cfg.ALERT_PASSWD, dbname=cfg.ALERT_DBNAME)
    else:
-      log('WARNING: ALERT_HOST specified, but alertdb not installed')
+      log('WARNING: ALERT_DBNAME specified, but alertdb not installed')
 
 EXIT = 0
 
