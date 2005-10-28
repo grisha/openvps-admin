@@ -91,7 +91,7 @@ def uptime(req, s='-2592000'): # 30 days
 
     uptime = RRD.graph(*args)[2][0][1:-1]
 
-    req.log_error(`args`)
+    #req.log_error(`args`)
 
     return uptime
  
