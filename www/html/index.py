@@ -140,7 +140,7 @@ def uptime_graph(req, s='-2592000'): # 30 days
     args.append('CDEF:degr=avg,%s,GE,0,INF,IF' % degr)
     
     # degraded shade
-    args.append('AREA:degr#ffff99:degraded (less than %s)\\n' % degr)
+    args.append('AREA:degr#ffff99:degraded\\n')
 
     # tranded average
     args.append('LINE2:tavg#0000FF:%d day moving average\\n' % (trend / (60*60*24)))
