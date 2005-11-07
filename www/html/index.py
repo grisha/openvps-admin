@@ -34,9 +34,21 @@ def index(req):
 
     return "More content will be added later\n"
 
-def _list_server_rrds():
+def _list_server_rrds(age=-2592000):
 
     result = []
+
+    known = []
+    known_hosts = os.path.join(cfg.VAR_DB_OPENVPS, 'known-hosts')
+    if os.path.exists(known_hosts):
+        lines = open(known_hosts).readlines()
+
+        for line in lines:
+
+            host, host_time = line.strip().split(None, 1)
+            host_time = time.strptime(host_time, '%Y-%m-%d %H:%M:%S')
+            if (time.time() - time.mktime(host_time)) >= abs(age):
+                known.append(host)
 
     files = os.listdir(cfg.VAR_DB_OPENVPS)
 
@@ -50,6 +62,9 @@ def _list_server_rrds():
         if (not file.endswith('-uptime.rrd') or
             not os.path.isfile(path) or os.path.islink(path) or
             (time.time() - os.path.getmtime(path)) > 24*60*60):
+            continue
+
+        if known and file[:-11] not in known:
             continue
 
         result.append(path)
