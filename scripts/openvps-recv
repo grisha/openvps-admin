@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.23 2005/10/28 21:03:37 grisha Exp $
+# $Id: openvps-recv,v 1.24 2005/11/07 00:18:01 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -67,6 +67,7 @@ if cfg.ALERT_DBNAME:
 EXIT = 0
 
 HB = {}
+KNOWN = {}
 
 def exit_handler(signum, frame):
    global EXIT
@@ -482,6 +483,36 @@ def check_heartbeats():
                HB[key] = [last_time, count, total_dur, avg, err_cnt+1, admin_down]
    
 
+def update_known_hosts(host):
+
+   global KNOWN
+
+   if not KNOWN.has_key(host):
+
+      known_hosts = os.path.join(cfg.VAR_DB_OPENVPS, 'known-hosts')
+      now = time.localtime()
+      open(known_hosts, 'a').write('%s %s\n' % (host, time.strftime('%Y-%m-%d %H:%M:%S', now)))
+
+      KNOWN[host] = now
+
+def read_known_hosts():
+
+   # read in a file of known hosts. the purpose of this
+   # file is to keep a time on when we ever heard first from
+   # this host
+   
+   global KNOWN
+
+   known_hosts = os.path.join(cfg.VAR_DB_OPENVPS, 'known-hosts')
+   if os.path.exists(known_hosts):
+      lines = open(known_hosts).readlines()
+
+      for line in lines:
+
+         host, host_time = line.strip().split(None, 1)
+         KNOWN[host] = time.strptime(host_time, '%Y-%m-%d %H:%M:%S')
+
+
 def do_work():
 
    global EXIT
@@ -489,6 +520,8 @@ def do_work():
    udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
    udp_sock.settimeout(10.0)
    udp_sock.bind(('0.0.0.0', cfg.MON_TARGET_PORT))
+
+   read_known_hosts()
 
    while 1:
 
@@ -541,6 +574,8 @@ def do_work():
                create_uptime_rrd(name)
 
             update_rrd(name, data)
+
+            update_known_hosts(name)
 
             update_uptime_rrd(name, 100, 100) # fully up
             update_heartbeat(name)
