@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# $Id: openvps-recv,v 1.24 2005/11/07 00:18:01 grisha Exp $
+# $Id: openvps-recv,v 1.25 2006/02/17 15:26:00 grisha Exp $
 
 # This is a daemon script that runs in the background, collects
 # datapoints ....
@@ -443,7 +443,7 @@ def check_heartbeats():
    else:
       LAST_HB_CHECK = time.time()
 
-   MAX = 3 # 3 times the average is considered down
+   MAX = 5 # 5 times the average is considered down
    MAX_ERR = 1 # number of notifications
 
    for key in HB.keys():
